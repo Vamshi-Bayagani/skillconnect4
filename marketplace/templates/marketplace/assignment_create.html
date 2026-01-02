@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Assignment · SkillConnect</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  min-height: 100vh;
+  background: linear-gradient(135deg, #020617, #0ea5e9, #6366f1, #22c55e, #f97316);
+  background-size: 350% 350%;
+  animation: bgMove 18s ease infinite;
+  color: #e5e7eb;
+  justify-content: center;
+  margin:0;
+  font-family:Poppins,system-ui;
+  display:flex;
+}
+
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.card{
+  width:100%;
+  max-width:720px;
+  background:rgba(15,23,42,0.96);
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7);
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+h2{
+  margin:0 0 6px;
+  font-size:22px;
+}
+.subtitle{
+  font-size:13px;
+  color:#9ca3af;
+  margin-bottom:16px;
+}
+
+/* form layout */
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+@media(max-width:700px){
+  .form-grid{grid-template-columns:1fr}
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+label{
+  font-size:12px;
+  color:#cbd5f5;
+}
+
+input, select, textarea{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(148,163,184,.35);
+  background:#020617;
+  color:#e5e7eb;
+  font-size:13px;
+  outline:none;
+  transition:.2s;
+}
+
+input:focus, select:focus, textarea:focus{
+  border-color:#22c55e;
+  box-shadow:0 0 0 2px rgba(34,197,94,.4);
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+/* full width sections */
+.full{grid-column:1 / -1}
+
+/* upload */
+.file{
+  border:1px dashed rgba(148,163,184,.4);
+  padding:14px;
+  border-radius:14px;
+  background:rgba(2,6,23,.6);
+  text-align:center;
+  font-size:12px;
+}
+
+/* actions */
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:18px;
+}
+
+.btn{
+  padding:10px 18px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+  transition:.2s;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#022c22;
+  box-shadow:0 12px 30px rgba(22,163,74,.8);
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 40px rgba(22,163,74,1);
+}
+
+.btn-outline{
+  background:transparent;
+  border:1px solid rgba(148,163,184,.4);
+  color:#e5e7eb;
+}
+.btn-outline:hover{
+  background:rgba(148,163,184,.1);
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>📌 Create Assignment</h2>
+  <div class="subtitle">
+    Assign a task to a freelancer with clear instructions & deadline.
+  </div>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-grid">
+
+      <!-- Freelancer -->
+      <div class="field">
+        <label>Assign to Freelancer</label>
+        <select name="freelancer" required>
+          <option value="">-- Select Freelancer --</option>
+          {% for f in freelancers %}
+            <option value="{{ f.id }}">
+              {{ f.first_name }} ({{ f.email }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Job -->
+      <div class="field">
+        <label>Related Job</label>
+        <select name="job" required>
+          <option value="">-- Select Job --</option>
+          {% for job in jobs %}
+            <option value="{{ job.id }}">{{ job.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Title -->
+      <div class="field full">
+        <label>Assignment Title</label>
+        <input type="text" name="title" placeholder="e.g. Build Login Page UI" required>
+      </div>
+
+      <!-- Description -->
+      <div class="field full">
+        <label>Description</label>
+        <textarea name="description"
+          placeholder="Explain what needs to be done, tools, expectations..."
+          required></textarea>
+      </div>
+
+      <!-- Deadline -->
+      <div class="field">
+        <label>Deadline</label>
+        <input type="date" name="deadline" required>
+      </div>
+
+      <!-- File -->
+      <div class="field">
+        <label>Assignment File (Optional)</label>
+        <div class="file">
+          <input type="file" name="assignment_file">
+          <div style="opacity:.7;margin-top:6px">
+            📎 PDF / ZIP / DOC
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline">
+        Cancel
+      </a>
+      <button type="submit" class="btn btn-primary">
+        🚀 Create Assignment
+      </button>
+    </div>
+  </form>
+</div>
+
+</body>
+</html>
+
+
+

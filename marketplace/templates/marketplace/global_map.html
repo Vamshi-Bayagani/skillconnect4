@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>🌍 Global Talent Map</title>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #020617;
+  overflow: hidden;
+  font-family: Poppins, system-ui;
+}
+
+#globe-container {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
+</head>
+
+<body>
+<div id="globe-container"></div>
+
+<script>
+/* SCENE */
+const scene = new THREE.Scene();
+
+/* CAMERA */
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.set(0, 0, 9);
+
+/* RENDERER */
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+document.getElementById("globe-container").appendChild(renderer.domElement);
+
+
+
+/* LIGHTS */
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const light = new THREE.PointLight(0xffffff, 1.2);
+light.position.set(10, 10, 10);
+scene.add(light);
+
+/* GLOBE GROUP */
+const globeGroup = new THREE.Group();
+scene.add(globeGroup);
+
+/* TEXTURE LOADER */
+const textureLoader = new THREE.TextureLoader();
+
+/* EARTH (REAL MAP) */
+const earthTexture = textureLoader.load(
+  "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"
+);
+
+const earth = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 64, 64),
+  new THREE.MeshStandardMaterial({
+    map: earthTexture,
+    roughness: 0.6,
+    metalness: 0.1
+  })
+);
+
+earth.rotation.z = 0.15; // natural tilt
+globeGroup.add(earth);
+
+/* ATMOSPHERE */
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(3.1, 64, 64),
+  new THREE.MeshBasicMaterial({
+    color: 0x60a5fa,
+    transparent: true,
+    opacity: 0.12
+  })
+);
+globeGroup.add(atmosphere);
+
+/* USER DOTS */
+function addDot(lat, lng, color) {
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+
+  const r = 3.02;
+  const x = r * Math.sin(phi) * Math.cos(theta);
+  const y = r * Math.cos(phi);
+  const z = r * Math.sin(phi) * Math.sin(theta);
+
+  const dot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.07, 16, 16),
+    new THREE.MeshBasicMaterial({ color })
+  );
+  dot.position.set(x, y, z);
+  globeGroup.add(dot);
+}
+
+/* SAMPLE DATA */
+addDot(28.6, 77.2, 0x22c55e, 0.09);   // Delhi, India
+addDot(31.0, 74.0, 0x22c55e);        // Lahore, Pakistan (near major cities)
+addDot(14.6, 121.0, 0x22c55e, 0.08);  // Manila, Philippines
+addDot(23.7, 90.4, 0x22c55e);        // Dhaka, Bangladesh
+addDot(50.0, 36.2, 0x22c55e);        // Kharkiv, Ukraine (tech/freelance hub)
+addDot(-23.6, -46.6, 0x22c55e);       // São Paulo, Brazil
+addDot(55.8, 37.6, 0x22c55e);        // Moscow, Russia
+addDot(6.5, 3.4, 0x22c55e);          // Lagos, Nigeria
+addDot(-6.2, 106.8, 0x22c55e);       // Jakarta, Indonesia
+addDot(24.9, 67.0, 0x22c55e);        // Karachi, Pakistan
+
+/* RECRUITERS / TALENT HUBS (Blue 0x3b82f6) - Major corporate/tech/recruitment centers */
+addDot(37.8, -122.4, 0x3b82f6, 0.09); // San Francisco, USA
+addDot(40.7, -74.0, 0x3b82f6, 0.09);  // New York, USA
+addDot(47.6, -122.3, 0x3b82f6);      // Seattle, USA
+addDot(51.5, -0.1, 0x3b82f6, 0.08);   // London, UK
+addDot(48.9, 2.4, 0x3b82f6);         // Paris, France
+addDot(52.5, 13.4, 0x3b82f6);        // Berlin, Germany
+addDot(35.7, 139.7, 0x3b82f6);       // Tokyo, Japan
+addDot(1.4, 103.8, 0x3b82f6);        // Singapore
+addDot(37.6, -77.5, 0x3b82f6);       // Richmond, VA (example US hub)
+addDot(25.0, 55.3, 0x3b82f6);        // Dubai, UAE
+
+/* Additional mixed/major cities */
+addDot(-33.9, 151.2, 0x22c55e);       // Sydney, Australia (growing freelance)
+addDot(19.1, 72.8, 0x22c55e, 0.08);   // Mumbai, India
+addDot(30.0, -81.7, 0x3b82f6);       // Orlando (US example)
+addDot(55.8, -4.3, 0x3b82f6);
+
+/* STARS */
+const starGeometry = new THREE.BufferGeometry();
+const starCount = 1500;
+const positions = [];
+
+for (let i = 0; i < starCount; i++) {
+  positions.push(
+    (Math.random() - 0.5) * 300,
+    (Math.random() - 0.5) * 300,
+    (Math.random() - 0.5) * 300
+  );
+}
+
+starGeometry.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(positions, 3)
+);
+
+const stars = new THREE.Points(
+  starGeometry,
+  new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.7,
+    transparent: true
+  })
+);
+scene.add(stars);
+
+/* ANIMATION */
+function animate() {
+  requestAnimationFrame(animate);
+  globeGroup.rotation.y += 0.002;   // 🌍 smooth rotation
+  stars.rotation.y += 0.0003;       // ✨ depth
+  renderer.render(scene, camera);
+}
+animate();
+
+/* RESIZE */
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+
+</body>
+</html>
+
+
